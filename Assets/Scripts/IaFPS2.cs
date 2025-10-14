@@ -6,6 +6,7 @@ public class IaFPS2 : MonoBehaviour
 {
     //Aqui é onde eu defino o componente de Ingeligencia
     public NavMeshAgent MeuSoldado;
+    //Estados que O Soldado pode ter
     public enum MeusEstados { ronda, perseguir, atacar, esperar };
     public MeusEstados maquinaEstados;
 
@@ -13,14 +14,14 @@ public class IaFPS2 : MonoBehaviour
     public List<GameObject> Destinos;
     //Para onde vai no momento
     public GameObject DestinoReal;
-    //Estados que o soldadoTem
-    public bool estadoMedo = false;
 
     public void Start()
     {
+        
         MeuSoldado = GetComponent<NavMeshAgent>();
         MeuSoldado.speed = 40;
-        DestinoReal = Destinos[0];
+        int sorteioDestino = Random.Range(0, Destinos.Count);
+        DestinoReal = Destinos[sorteioDestino];
     }
 
     void Update()
@@ -28,7 +29,24 @@ public class IaFPS2 : MonoBehaviour
         //Calcula a Distancia entre esse Objeto e o Objeto Destino
         float DistanciaFinal = Vector3.Distance(
                 transform.position, DestinoReal.transform.position);
-        //Estado normal Sem medo
+        //Construir Maquina De Estado
+
+        if(maquinaEstados == MeusEstados.ronda)
+        {
+
+        }
+        if(maquinaEstados == MeusEstados.esperar)
+        {
+
+        }
+        if(maquinaEstados == MeusEstados.atacar)
+        {
+
+        }
+        if(maquinaEstados == MeusEstados.perseguir)
+        {
+
+        }
         if (estadoMedo == false)
         {
             //Faz com que o Objeto o Alvo vá até o destino
