@@ -7,6 +7,8 @@ public class IaFPS : MonoBehaviour
 
     //Aqui é onde eu defino o componente de Ingeligencia
     public NavMeshAgent MeuSoldado;
+    public enum MeusEstados { ronda, perseguir, atacar, esperar};
+    public MeusEstados maquinaEstados;
 
     //Destinos que ele tem que fazer ronda
     public List<GameObject> Destinos;
