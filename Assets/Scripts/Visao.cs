@@ -4,6 +4,7 @@ public class Visao : MonoBehaviour
 {
     //Alcance do meu raio
     public float alcance = 20f;
+    public IaFPS2 Soldado;
 
    
     void Update()
@@ -17,10 +18,16 @@ public class Visao : MonoBehaviour
 
             if(hit.collider.tag == "Soldado")
             {
-                Debug.Log(hit.collider.gameObject.name);
-                //Bateu em soldado
-                Debug.DrawRay(transform.position,
-                        direcao * alcance, Color.yellow);
+                if(hit.collider.gameObject != Soldado.gameObject)
+                {
+                    Debug.Log(Soldado.gameObject.name +
+                    " Avistou: " + hit.collider.gameObject.name);
+                    //Bateu em soldado
+                    Soldado.AvistarInimigo(hit.collider.gameObject);
+                    Debug.DrawRay(transform.position,
+                            direcao * alcance, Color.yellow);
+                }
+                
             }
             else
             {

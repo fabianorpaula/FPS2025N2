@@ -14,6 +14,10 @@ public class IaFPS2 : MonoBehaviour
     public List<GameObject> Destinos;
     //Para onde vai no momento
     public GameObject DestinoReal;
+    public float tempoTroca = 0;
+
+    //Vida
+    public int hp = 10;
 
     public void Start()
     {
@@ -30,14 +34,26 @@ public class IaFPS2 : MonoBehaviour
         float DistanciaFinal = Vector3.Distance(
                 transform.position, DestinoReal.transform.position);
         //Construir Maquina De Estado
-
         if(maquinaEstados == MeusEstados.ronda)
         {
-
+            FazerRonda(DistanciaFinal);
+            MeuSoldado.speed = 40;
+            tempoTroca += Time.deltaTime;
+            if (tempoTroca > 30)
+            {
+                maquinaEstados = MeusEstados.esperar;
+                tempoTroca = 0;
+            }
         }
         if(maquinaEstados == MeusEstados.esperar)
         {
-
+            MeuSoldado.speed = 0;
+            tempoTroca += Time.deltaTime;
+            if(tempoTroca > 3)
+            {
+                maquinaEstados = MeusEstados.ronda;
+                tempoTroca = 0;
+            }
         }
         if(maquinaEstados == MeusEstados.atacar)
         {
@@ -45,46 +61,58 @@ public class IaFPS2 : MonoBehaviour
         }
         if(maquinaEstados == MeusEstados.perseguir)
         {
-
-        }
-        if (estadoMedo == false)
-        {
-            //Faz com que o Objeto o Alvo vá até o destino
-            MeuSoldado.SetDestination(DestinoReal.transform.position);
-            //Se o destino está perto ele entre no if
-            if (DistanciaFinal < 7)
+            SeguirInimigo();
+            if(DestinoReal == null)
             {
-                //Sorteia um Novo caminho
-                int novocaminho = Random.Range(0, Destinos.Count);
-                DestinoReal = Destinos[novocaminho];
-
+                maquinaEstados = MeusEstados.esperar;
+                int sorteioDestino = Random.Range(0, Destinos.Count);
+                DestinoReal = Destinos[sorteioDestino];
             }
         }
-        if (estadoMedo == true)
+
+    }
+    
+
+    public void AvistarInimigo(GameObject InimigoAvistado)
+    {
+        if(maquinaEstados == MeusEstados.ronda || maquinaEstados == MeusEstados.esperar)
         {
-            MeuSoldado.SetDestination(DestinoReal.transform.position);
-            if (DistanciaFinal < 1)
-            {
-                MeuSoldado.speed = 0;
-            }
+            maquinaEstados = MeusEstados.perseguir;
+            DestinoReal = InimigoAvistado;
+        }
+        
+    }
+
+    void SeguirInimigo()
+    {
+        MeuSoldado.SetDestination(DestinoReal.transform.position);
+    }
+
+    void FazerRonda(float DistanciaFinal)
+    {
+        //Faz com que o Objeto o Soldado vá até o destino
+        MeuSoldado.SetDestination(DestinoReal.transform.position);
+        //Se o destino está perto ele entre no if
+        if (DistanciaFinal < 7)
+        {
+            //Sorteia um Novo caminho
+            int novocaminho = Random.Range(0, Destinos.Count);
+            DestinoReal = Destinos[novocaminho];
+
+        }
+
+    }
+    public void TomarDano()
+    {
+        hp--;
+        if(hp <= 0)
+        {
+            Destroy(this.gameObject);
         }
     }
+
     private void OnTriggerEnter(Collider contato)
     {
-        if (contato.gameObject.tag == "Grama")
-        {
-            Debug.Log("VI GRAMA" + contato.gameObject.name);
-            if (estadoMedo == true)
-            {
-                DestinoReal = contato.gameObject;
-                Debug.Log("ESSA É A GRAMA MAIS PERTO");
-            }
-        }
-
-        if (contato.gameObject.tag == "Lobo")
-        {
-            estadoMedo = true;
-            Debug.Log("Estou com Medo");
-        }
+        
     }
 }
