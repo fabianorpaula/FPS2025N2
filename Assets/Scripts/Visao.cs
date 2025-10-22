@@ -20,12 +20,11 @@ public class Visao : MonoBehaviour
             {
                 if(hit.collider.gameObject != Soldado.gameObject)
                 {
-                    Debug.Log(Soldado.gameObject.name +
-                    " Avistou: " + hit.collider.gameObject.name);
+                    
                     //Bateu em soldado
                     Soldado.AvistarInimigo(hit.collider.gameObject);
                     Debug.DrawRay(transform.position,
-                            direcao * alcance, Color.yellow);
+                            hit.collider.transform.position, Color.yellow);
                 }
                 
             }

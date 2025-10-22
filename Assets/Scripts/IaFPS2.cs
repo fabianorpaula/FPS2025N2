@@ -1,9 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering;
 
 public class IaFPS2 : MonoBehaviour
 {
+
+
+
+
+
     //Aqui é onde eu defino o componente de Ingeligencia
     public NavMeshAgent MeuSoldado;
     //Estados que O Soldado pode ter
@@ -16,28 +22,67 @@ public class IaFPS2 : MonoBehaviour
     public GameObject DestinoReal;
     public float tempoTroca = 0;
 
-    //Vida
+    //ParametrosJOgo
     public int hp = 10;
+    public int bonushp = 0;
+    public float speed = 20;
+    public float bonusspeed = 0;
+    public float visao = 20;
+    public float mira = 15;
+    public float seguir = 10;
+    public float atirar = 10;
+
+
+
+    //Animacao
+    public Animator animator;
+
+    //Acessa a Visão
+    public Visao minhaVisao;
+
+    //Deve Acessar a Arma
+    public Atirar minhaArma;
 
     public void Start()
     {
         
+        DefinirParametros();
         MeuSoldado = GetComponent<NavMeshAgent>();
-        MeuSoldado.speed = 40;
+        MeuSoldado.speed = speed;
         int sorteioDestino = Random.Range(0, Destinos.Count);
         DestinoReal = Destinos[sorteioDestino];
     }
 
+
+    void DefinirParametros()
+    {
+        int sorteioNascimento = Random.Range(0, Destinos.Count);
+        transform.position = Destinos[sorteioNascimento].transform.position;
+        minhaArma.alcance += mira;
+        minhaVisao.alcance += visao;
+        hp += bonushp;
+        speed += bonusspeed;
+    }
+
     void Update()
     {
+
+        if (DestinoReal == null)
+        {
+            maquinaEstados = MeusEstados.ronda;
+            int sorteioDestino = Random.Range(0, Destinos.Count);
+            DestinoReal = Destinos[sorteioDestino];
+        }
+
         //Calcula a Distancia entre esse Objeto e o Objeto Destino
         float DistanciaFinal = Vector3.Distance(
                 transform.position, DestinoReal.transform.position);
         //Construir Maquina De Estado
         if(maquinaEstados == MeusEstados.ronda)
         {
+            animator.SetBool("Tiro", false);
             FazerRonda(DistanciaFinal);
-            MeuSoldado.speed = 40;
+            MeuSoldado.speed = speed;
             tempoTroca += Time.deltaTime;
             if (tempoTroca > 30)
             {
@@ -47,6 +92,7 @@ public class IaFPS2 : MonoBehaviour
         }
         if(maquinaEstados == MeusEstados.esperar)
         {
+            animator.SetBool("Tiro", false);
             MeuSoldado.speed = 0;
             tempoTroca += Time.deltaTime;
             if(tempoTroca > 3)
@@ -57,18 +103,30 @@ public class IaFPS2 : MonoBehaviour
         }
         if(maquinaEstados == MeusEstados.atacar)
         {
-
+            MeuSoldado.speed = speed / 2;
+            SeguirInimigo();
+            animator.SetBool("Tiro", true);
+            var dir = (DestinoReal.transform.position - transform.position).normalized;
+            var rot = Quaternion.LookRotation(dir, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rot, 8f * Time.deltaTime);
+            if (DistanciaFinal >seguir)
+            {
+                maquinaEstados = MeusEstados.perseguir;
+            }
         }
         if(maquinaEstados == MeusEstados.perseguir)
         {
+            MeuSoldado.speed = speed;
+            animator.SetBool("Tiro", false);
             SeguirInimigo();
-            if(DestinoReal == null)
+            if(DistanciaFinal < atirar)
             {
-                maquinaEstados = MeusEstados.esperar;
-                int sorteioDestino = Random.Range(0, Destinos.Count);
-                DestinoReal = Destinos[sorteioDestino];
+                maquinaEstados = MeusEstados.atacar;
             }
+
+
         }
+
 
     }
     
@@ -77,7 +135,16 @@ public class IaFPS2 : MonoBehaviour
     {
         if(maquinaEstados == MeusEstados.ronda || maquinaEstados == MeusEstados.esperar)
         {
-            maquinaEstados = MeusEstados.perseguir;
+            float DistanciaFinal = Vector3.Distance(
+               transform.position, DestinoReal.transform.position);
+            if(DistanciaFinal < atirar)
+            {
+                maquinaEstados = MeusEstados.atacar;
+            }else
+            {
+                maquinaEstados = MeusEstados.perseguir;
+            }
+                
             DestinoReal = InimigoAvistado;
         }
         
@@ -111,8 +178,8 @@ public class IaFPS2 : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider contato)
+    public void MeuTiro()
     {
-        
+        minhaArma.Atirando();
     }
 }

@@ -6,8 +6,9 @@ public class Atirar : MonoBehaviour
     public float alcance = 20f;
    
 
-    void Update()
+    public void Atirando()
     {
+        
         RaycastHit hit;
         Vector3 direcao = transform.
             TransformDirection(Vector3.down);
@@ -18,7 +19,7 @@ public class Atirar : MonoBehaviour
 
             //Bateu em soldado
             hit.collider.gameObject.GetComponent<IaFPS2>().TomarDano();
-            Debug.DrawRay(transform.position, direcao * alcance, Color.magenta); 
+            Debug.DrawRay(transform.position, hit.collider.gameObject.transform.position, Color.magenta); 
             }
             else
             {
@@ -26,7 +27,7 @@ public class Atirar : MonoBehaviour
                 Debug.DrawRay(transform.position,
                         direcao * alcance, Color.blue);
             }
-        }
+    }
      
 
 }
